@@ -3,668 +3,1274 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>QR Code Reader | Live Camera + File Upload</title>
-  <!-- jsQR library: lightweight, robust QR decoding from image data -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <title>DirectPay+ Business | Custom Product Icons + Payment Required</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
-      background: linear-gradient(145deg, #101418 0%, #1a1f2a 100%);
+      background: linear-gradient(135deg, #eef2f7 0%, #d4dfed 100%);
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem;
+      padding: 0.8rem;
+      overflow-x: hidden;
     }
 
-    /* main card container */
-    .reader-container {
-      max-width: 680px;
-      width: 100%;
-      background: rgba(20, 25, 35, 0.8);
-      backdrop-filter: blur(2px);
-      border-radius: 2.5rem;
-      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    @media (min-width: 640px) {
+      body { padding: 1rem; }
+    }
+    @media (min-width: 1024px) {
+      body { padding: 2rem 1.5rem; }
+    }
+
+    .main-content {
+      max-width: 1300px;
+      margin: 0 auto;
+      transition: filter 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    .front-card {
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25);
       overflow: hidden;
-      padding: 1.5rem;
+      width: 100%;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, #0b2b3f, #1a4a6e);
+      padding: 1rem;
+      color: white;
+      text-align: center;
+    }
+
+    .hero-section h1 {
+      font-size: 1.3rem;
+      word-break: break-word;
+    }
+    .hero-section p {
+      font-size: 0.75rem;
+      opacity: 0.9;
+    }
+
+    @media (min-width: 640px) {
+      .hero-section { padding: 1.2rem; }
+      .hero-section h1 { font-size: 1.6rem; }
+    }
+    @media (min-width: 1024px) {
+      .hero-section { padding: 1.8rem 2rem; }
+      .hero-section h1 { font-size: 2rem; }
+    }
+
+    .two-col-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    @media (min-width: 900px) {
+      .two-col-grid {
+        grid-template-columns: 1fr 1.2fr;
+        gap: 1.5rem;
+        padding: 1.5rem;
+      }
+    }
+    @media (min-width: 1200px) {
+      .two-col-grid { gap: 2rem; padding: 2rem; }
+    }
+
+    .client-panel, .merchant-panel {
+      background: white;
+      border-radius: 1.2rem;
+      padding: 1rem;
+      border: 1px solid #e2edf7;
+      overflow-x: hidden;
+    }
+
+    .info-card {
+      background: #f1f5f9;
+      border-radius: 1rem;
+      padding: 0.8rem;
+      margin-top: 0.8rem;
+      font-size: 0.8rem;
+      word-break: break-word;
+    }
+
+    .info-card p {
+      margin: 0.4rem 0;
+    }
+
+    .product-strip-wrapper {
+      margin-bottom: 1rem;
+      background: #f8fafc;
+      border-radius: 1rem;
+      padding: 0.5rem;
+      overflow-x: hidden;
+    }
+
+    .product-strip-wrapper h4 {
+      font-size: 0.7rem;
+      color: #334155;
+      margin-bottom: 0.4rem;
+    }
+
+    .scroll-container {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      width: 100%;
+    }
+
+    .scroll-btn {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 2rem;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #1e293b;
+      transition: all 0.2s;
+    }
+
+    .scroll-btn:active {
+      transform: scale(0.95);
+    }
+
+    .scrollable-products-compact {
+      display: flex;
+      overflow-x: auto;
+      gap: 0.4rem;
+      padding-bottom: 0.3rem;
+      scroll-behavior: smooth;
+      flex: 1;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .scrollable-products-compact::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .product-card-compact {
+      flex: 0 0 70px;
+      background: white;
+      border-radius: 0.7rem;
+      padding: 0.25rem 0.1rem;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .product-card-compact:active {
+      transform: scale(0.97);
+    }
+
+    .product-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .product-emoji-fallback {
+      font-size: 1.2rem;
+      display: block;
+    }
+
+    .product-name-compact {
+      font-size: 0.48rem;
+      font-weight: 600;
+      margin: 0.15rem 0 0.05rem;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+      max-width: 66px;
+    }
+
+    .product-price-compact {
+      font-size: 0.45rem;
+      color: #f97316;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .selected-product-tag {
+      margin-top: 0.3rem;
+      font-size: 0.6rem;
+      background: #e6f7ff;
+      padding: 0.15rem 0.4rem;
+      border-radius: 1.5rem;
+      display: inline-block;
+      color: #0c4a6e;
+      word-break: break-word;
+    }
+
+    .form-group {
+      margin-bottom: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      width: 100%;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    input, select, textarea {
+      padding: 0.6rem 0.7rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 0.9rem;
+      font-size: 0.8rem;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    @media (min-width: 640px) {
+      .form-group { margin-bottom: 1rem; }
+      .form-group label { font-size: 0.8rem; }
+      input, select, textarea { padding: 0.7rem 0.8rem; font-size: 0.85rem; }
+    }
+
+    input.readonly-field, select.readonly-field {
+      background-color: #f1f5f9;
+      cursor: not-allowed;
+    }
+
+    .radio-group-row, .provider-radio-group, .method-radio-group {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      background: #f8fafc;
+      padding: 0.4rem 0.7rem;
+      border-radius: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .method-radio-group {
+      background: #eef2ff;
+      margin: 0.5rem 0;
+    }
+
+    .provider-radio-group {
+      background: #eef2ff;
+      margin-top: 0.3rem;
+    }
+
+    .policy-confirm-area {
+      background: #f1f5f9;
+      border-radius: 1rem;
+      padding: 0.6rem 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 0.8rem 0;
+    }
+
+    .pay-button, .release-button, .gen-id-button, .reset-btn, .prices-btn {
+      width: 100%;
+      padding: 0.65rem;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 700;
+      margin-top: 0.6rem;
+      cursor: pointer;
+      font-size: 0.85rem;
       transition: all 0.2s ease;
     }
 
-    h1 {
-      font-size: 1.8rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, #E6F7FF, #A0D2FF);
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      text-align: center;
-      letter-spacing: -0.3px;
-      margin-bottom: 0.3rem;
+    .pay-button { background: #f97316; color: white; }
+    .release-button { background: #2c7da0; color: white; }
+    .gen-id-button { background: #8b5cf6; color: white; width: auto; margin-top: 0; padding: 0.6rem 1rem; white-space: nowrap; }
+    .reset-btn { background: #e2e8f0; color: #1e293b; }
+    .prices-btn { background: #0b2b3f; color: white; margin-top: 0; transition: background 0.2s, transform 0.1s; }
+    .prices-btn.highlight-green { background: #10b981; color: white; box-shadow: 0 2px 8px rgba(16,185,129,0.4); }
+
+    .button-group {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+    .button-group .reset-btn {
+      margin-top: 0;
+    }
+    .button-group .prices-btn {
+      margin-top: 0;
     }
 
-    .sub {
-      text-align: center;
-      color: #8f9bb3;
-      font-size: 0.85rem;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px dashed #2c3240;
-      display: inline-block;
-      width: auto;
-      padding-bottom: 0.5rem;
+    .ussd-output {
+      background: #f1f5f9;
+      border-radius: 1rem;
+      padding: 0.7rem;
+      margin-top: 0.8rem;
+      border-left: 4px solid #f97316;
+      word-break: break-all;
     }
 
-    /* video preview area */
-    .video-wrapper {
-      background: #000000;
-      border-radius: 1.8rem;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.1);
-      margin-bottom: 1.3rem;
-      border: 1px solid rgba(255,255,255,0.2);
+    .copy-btn, .dial-btn {
+      background: #e2e8f0;
+      border: none;
+      padding: 0.3rem 0.7rem;
+      border-radius: 1rem;
+      cursor: pointer;
+      font-size: 0.7rem;
+      margin-right: 0.5rem;
     }
 
-    video {
-      width: 100%;
-      display: block;
-      object-fit: cover;
-      aspect-ratio: 4 / 3;
-      background: #0a0c12;
+    .provider-selector {
+      margin: 0.5rem 0;
     }
 
-    /* scanning overlay effect (purely visual) */
-    .scan-overlay {
-      position: absolute;
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none;
-      border-radius: 1.8rem;
-      box-shadow: inset 0 0 0 2px rgba(0, 255, 255, 0.3);
-      transition: 0.2s;
-    }
-
-    /* button group */
-    .button-group {
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-      justify-content: center;
-      margin: 1.2rem 0 1rem;
-    }
-
-    button, .file-label {
-      background: #2a2f3c;
-      border: none;
-      padding: 0.7rem 1.4rem;
-      border-radius: 3rem;
-      font-weight: 500;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: #eef2ff;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-      display: inline-flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      z-index: 5000;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0.2s, opacity 0.2s;
     }
-
-    button i, .file-label i {
-      font-style: normal;
-      font-weight: 600;
-      font-size: 1.1rem;
+    .modal-overlay.active {
+      visibility: visible;
+      opacity: 1;
     }
-
-    button:hover, .file-label:hover {
-      background: #3d4456;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-    }
-
-    button:active {
-      transform: translateY(1px);
-    }
-
-    .btn-primary {
-      background: #2b6ef0;
-      color: white;
-      box-shadow: 0 4px 12px rgba(43, 110, 240, 0.3);
-    }
-
-    .btn-primary:hover {
-      background: #1a5ad9;
-    }
-
-    .btn-danger {
-      background: #3b2c2f;
-      color: #ffb4a2;
-    }
-
-    .btn-danger:hover {
-      background: #5c3e3e;
-      color: #ffcdbc;
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
-    /* result panel */
-    .result-card {
-      background: rgba(10, 14, 23, 0.75);
-      border-radius: 1.8rem;
-      padding: 1rem 1.2rem;
-      margin-top: 1.2rem;
-      border: 1px solid rgba(72, 187, 255, 0.2);
-      backdrop-filter: blur(4px);
-    }
-
-    .result-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      margin-bottom: 0.7rem;
-      border-bottom: 1px dashed #2e3a48;
-      padding-bottom: 0.5rem;
-    }
-
-    .result-header span {
-      font-weight: 600;
-      letter-spacing: 1px;
-      font-size: 0.85rem;
-      background: #1e88e5;
-      padding: 0.2rem 0.8rem;
-      border-radius: 40px;
-      color: white;
-    }
-
-    .copy-btn {
-      background: transparent;
-      box-shadow: none;
-      padding: 0.2rem 0.8rem;
-      font-size: 0.7rem;
-      background: #2d3748;
-    }
-
-    .qr-data {
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      word-break: break-all;
-      white-space: pre-wrap;
-      color: #ccdeee;
-      font-size: 0.95rem;
-      line-height: 1.45;
-      max-height: 150px;
+    .modal-container {
+      background: white;
+      border-radius: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
       overflow-y: auto;
-      padding: 0.3rem 0;
+      box-shadow: 0 30px 50px rgba(0,0,0,0.4);
     }
-
-    .link-hint {
-      margin-top: 8px;
-    }
-
-    .link-hint a {
-      color: #6bc4ff;
-      text-decoration: none;
-      font-weight: 500;
-      border-bottom: 1px dashed;
-    }
-
-    .status-msg {
-      font-size: 0.8rem;
-      color: #9aa9c1;
+    .modal-header {
+      background: linear-gradient(135deg, #0b2b3f, #1a4a6e);
+      color: white;
+      padding: 1rem;
       text-align: center;
-      margin-top: 0.7rem;
     }
-
-    .error-msg {
-      color: #ffa098;
-      background: #3a1e1e80;
-      border-radius: 30px;
-      padding: 0.3rem 1rem;
+    .modal-body {
+      padding: 1.5rem;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 0.8rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .modal-btn.primary {
+      background: #f97316;
+      color: white;
+    }
+    .modal-btn.secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    .modal-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .image-replace-area, .product-edit-area {
+      background: #fef3c7;
+      border-radius: 1rem;
+      padding: 0.8rem;
+      margin-top: 1rem;
+    }
+    .upload-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 0.5rem 0;
+    }
+    .file-label {
+      background: #6b21a5;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      cursor: pointer;
       display: inline-block;
     }
-
-    footer {
+    .small-btn {
+      background: #059669;
+      color: white;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
       font-size: 0.7rem;
-      text-align: center;
-      color: #5b687c;
-      margin-top: 1.2rem;
+      cursor: pointer;
+    }
+    .status-text {
+      font-size: 0.65rem;
+      margin-top: 0.3rem;
+      color: #334155;
+    }
+    .icon-preview {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      margin: 0 auto;
+      display: block;
+    }
+    .emoji-large {
+      font-size: 3rem;
+    }
+    .payment-confirmation {
+      background: #e6f7ff;
+      border-radius: 0.8rem;
+      padding: 0.8rem;
+      margin: 1rem 0;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
     }
 
-    @media (max-width: 550px) {
-      .reader-container {
-        padding: 1rem;
-      }
-      button, .file-label {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-      }
+    /* Partnership & Policy modals */
+    .partnership-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4000;
+      visibility: visible;
+      opacity: 1;
+      transition: visibility 0.2s, opacity 0.2s;
+    }
+    .partnership-modal-overlay.hidden {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .partnership-modal {
+      background: white;
+      border-radius: 2rem;
+      max-width: 520px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 50px rgba(0,0,0,0.4);
+    }
+    .policy-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0.2s, opacity 0.2s;
+    }
+    .policy-modal-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+    .error-text {
+      color: #dc2626;
+      font-size: 0.65rem;
+      margin-top: 0.2rem;
+    }
+    button, input, select, textarea {
+      max-width: 100%;
     }
   </style>
 </head>
 <body>
 
-<div class="reader-container">
-  <h1>📷 QR Code Reader</h1>
-  <div style="text-align: center;"><span class="sub">Any type · Live scan · File upload</span></div>
-
-  <!-- Camera preview area -->
-  <div class="video-wrapper">
-    <video id="qr-video" playsinline autoplay muted></video>
-    <div class="scan-overlay" id="scanOverlay"></div>
-  </div>
-
-  <!-- Action Buttons -->
-  <div class="button-group">
-    <button id="startCameraBtn" class="btn-primary">📸 Start Camera</button>
-    <button id="stopCameraBtn" class="btn-danger">⏹️ Stop Camera</button>
-    <label for="uploadQR" class="file-label">📂 Upload Image</label>
-    <input type="file" id="uploadQR" accept="image/*, image/jpeg, image/png, image/webp">
-  </div>
-
-  <!-- Decoded result section -->
-  <div class="result-card" id="resultCard">
-    <div class="result-header">
-      <span>🔍 DECODED DATA</span>
-      <button id="copyResultBtn" class="copy-btn" style="font-size:0.7rem;">📋 Copy</button>
+<!-- PARTNERSHIP MODAL -->
+<div id="partnershipModal" class="partnership-modal-overlay">
+  <div class="partnership-modal">
+    <div class="partnership-modal-header">
+      <h2>📋 Partnership Registration</h2>
+      <p>Complete your Partner Business profile to continue</p>
     </div>
-    <div class="qr-data" id="qrResultText">
-      — Waiting for QR code —
+    <div class="partnership-modal-body">
+      <div class="form-group"><label>🏢 Business name *</label><input type="text" id="partnershipBizName" placeholder="Legal business name"></div>
+      <div class="form-group"><label>📍 Business address *</label><input type="text" id="partnershipAddress" placeholder="Full address"></div>
+      <div class="form-group"><label>📧 Email address *</label><input type="email" id="partnershipEmail" placeholder="contact@business.com"></div>
+      <div class="form-group"><label>👤 Recipient Name *</label><input type="text" id="partnershipRecipientName" placeholder="Full name of recipient"></div>
+      <div class="form-group"><label>📞 9-digit phone OR 6-digit agent code *</label><input type="text" id="partnershipIdentifier" placeholder="e.g., 761234567 or 892345"><div id="partnershipIdentifierError" class="error-text"></div></div>
+      <div class="form-group"><label>💼 Your position *</label><select id="partnershipPosition"><option value="" disabled selected>– Select –</option><option>Owner / CEO</option><option>Manager</option><option>Accountant</option><option>Sales Representative</option><option>Operations Lead</option><option>Administrator</option></select></div>
+      <div id="partnershipProviderArea" style="display: none;" class="provider-selector">
+        <label>📱 Default Mobile Money Provider (for Standard mode):</label>
+        <div class="provider-radio-group">
+          <label><input type="radio" name="partnershipProvider" value="afrimoney"> 📱 Afrimoney</label>
+          <label><input type="radio" name="partnershipProvider" value="orangemoney"> 🍊 Orange Money</label>
+        </div>
+        <div id="partnershipProviderHint" class="error-text" style="color:#0c4a6e;"></div>
+      </div>
+      <div id="partnershipModalError" class="error-text" style="background:#fee2e2; padding:0.5rem; border-radius:0.5rem; display:none;"></div>
     </div>
-    <div id="linkWrapper" class="link-hint"></div>
-    <div class="status-msg" id="statusMessage">
-      ⚡ Use "Start Camera" & point at any QR code
+    <div class="partnership-modal-footer">
+      <button id="confirmPartnershipBtn" class="btn-partnership">✅ Register Partnership & Continue</button>
     </div>
   </div>
-  <footer>
-    ⚡ Supports URLs, text, contact, WIFI, any QR content • Works on mobile & desktop
-  </footer>
+</div>
+
+<!-- POLICY MODAL -->
+<div id="policyModal" class="policy-modal-overlay">
+  <div class="policy-modal">
+    <div class="policy-modal-header">
+      <h2>📜 DirectPay+ User Policy</h2>
+      <p>Please read carefully</p>
+    </div>
+    <div class="policy-modal-body">
+      <div class="policy-text">
+        📜 Dear valuable user!<br><br>
+        <strong>DirectPay+</strong> thanks you for choosing us. Please be reminded that your attention is required.<br><br>
+        ✓ Type correct Names, Phone numbers, Amount, Addresses as mistakes may lead to miss‑transfers.<br><br>
+        ✓ If issues arise from our side we take responsibility. Please use this application responsibly.
+      </div>
+      <button id="policyOkBtn" class="policy-ok-btn">✅ OK, I Understand</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL (icon replacement) -->
+<div id="productModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>🖼️ Customize Product Icon</h2>
+      <p>Upload an image to replace this product's emoji</p>
+    </div>
+    <div class="modal-body">
+      <div id="modalIconPreview" style="text-align:center; margin-bottom:1rem;"></div>
+      <p><strong id="modalProductName">Product</strong> — <span id="modalProductPrice">0</span> Le</p>
+      <div class="modal-buttons">
+        <button id="modalSelectProductBtn" class="modal-btn primary">✅ Select this product</button>
+        <button id="modalCloseBtn" class="modal-btn secondary">❌ Cancel</button>
+      </div>
+      <div class="image-replace-area">
+        <h4>🖼️ Replace Product Icon</h4>
+        <div class="upload-row">
+          <label class="file-label">📂 Choose image<input type="file" id="modalImageUpload" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none"></label>
+          <button id="modalUploadTriggerBtn" class="small-btn">📤 Read & Create Link</button>
+        </div>
+        <div id="modalUploadStatus" class="status-text">No image selected.</div>
+        <button id="modalReplaceIconBtn" class="small-btn" style="background:#0b2b3f; width:100%; margin-top:0.5rem;">🔄 Proceed to Edit & Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT EDIT MODAL (with payment requirement) -->
+<div id="productEditModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>✏️ Edit Product Details & Make Payment</h2>
+      <p>Payment required to replace icon</p>
+    </div>
+    <div class="modal-body">
+      <div id="editModalIconPreview" style="text-align:center; margin-bottom:1rem;"></div>
+      <div class="form-group"><label>Product Name</label><input type="text" id="editProductName" placeholder="Product name"></div>
+      <div class="form-group"><label>Price (Le)</label><input type="number" id="editProductPrice" placeholder="Price"></div>
+      <div class="form-group"><label>Description</label><textarea id="editProductDescription" rows="2" placeholder="Product description..."></textarea></div>
+      
+      <div class="product-edit-area">
+        <h4>📞 Generate O-Money USSD (20% of price)</h4>
+        <button id="generateUssdTwentyBtn" class="small-btn" style="background:#f97316; width:100%; margin-bottom:0.5rem;">🔢 Generate USSD (20%)</button>
+        <div id="twentyUssdOutput" style="display:none;" class="ussd-output">
+          <strong>USSD Code (20% of price):</strong><br>
+          <code id="twentyUssdCode" style="word-break:break-all;"></code><br>
+          <button id="copyTwentyUssdBtn" class="copy-btn">📋 Copy</button>
+          <button id="dialTwentyUssdBtn" class="dial-btn">📞 Open Dialer</button>
+        </div>
+        
+        <div id="paymentConfirmationArea" style="display:none;" class="payment-confirmation">
+          <label class="checkbox-label">
+            <input type="checkbox" id="paymentConfirmedCheckbox"> ✅ I have completed the payment using the above USSD code
+          </label>
+        </div>
+      </div>
+      
+      <div class="modal-buttons" style="margin-top:1rem;">
+        <button id="saveProductAndIconBtn" class="modal-btn primary" disabled>💾 Save & Replace Icon (Requires Payment Confirmation)</button>
+        <button id="closeEditModalBtn" class="modal-btn secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content" id="mainContent">
+  <div class="front-card">
+    <div class="hero-section">
+      <h1>⚡ DirectPay+ Business</h1>
+      <p>Custom product icons – payment required to replace icon</p>
+    </div>
+    <div class="two-col-grid">
+      <div class="client-panel">
+        <h3>🤝 Partner Business</h3>
+        <div class="info-card">
+          <p><strong>Business:</strong> <span id="displayBizName">—</span></p>
+          <p><strong>Address:</strong> <span id="displayAddress">—</span></p>
+          <p><strong>Identifier:</strong> <span id="displayIdentifier">—</span></p>
+          <p><strong>Position:</strong> <span id="displayPosition">—</span></p>
+          <p><strong>Recipient:</strong> <span id="displayRecipientName">—</span></p>
+        </div>
+        <div class="button-group">
+          <button id="resetRegistrationBtn" class="reset-btn">🔄 Reset Partnership</button>
+          <button id="pricesButton" class="prices-btn">💰 Prices</button>
+        </div>
+      </div>
+      
+      <div class="merchant-panel">
+        <h3>📄 DirectPay Transaction</h3>
+        
+        <div class="product-strip-wrapper">
+          <h4>🛒 Products (click any card to customize icon - payment required)</h4>
+          <div class="scroll-container">
+            <button class="scroll-btn" id="scrollLeftBtn">◀</button>
+            <div class="scrollable-products-compact" id="productStripCompact"></div>
+            <button class="scroll-btn" id="scrollRightBtn">▶</button>
+          </div>
+          <div id="selectedProductCompactInfo" class="selected-product-tag" style="display: none;"></div>
+        </div>
+        
+        <div class="form-group"><label>Business name</label><input type="text" id="merchantBizName" class="readonly-field" readonly></div>
+        <div class="form-group"><label>Address</label><input type="text" id="merchantAddress" class="readonly-field" readonly></div>
+        <div class="form-group"><label>Identifier</label><input type="text" id="merchantIdentifier" class="readonly-field" readonly></div>
+        <div class="form-group"><label>Position</label><input type="text" id="merchantPosition" class="readonly-field" readonly></div>
+        <div class="form-group"><label>🔢 Serial Number</label><input type="text" id="serialNumberField" class="readonly-field" readonly value="--"></div>
+        
+        <div class="form-group">
+          <label>💰 Amount (Le) *</label>
+          <input type="number" id="amountInput" placeholder="Enter amount or use product price via Prices button">
+          <div id="amountError" class="error-text"></div>
+        </div>
+        
+        <div class="form-group"><label>📝 Recipient Name *</label><input type="text" id="recipientNameField" class="readonly-field" readonly placeholder="Auto-filled"></div>
+        
+        <div class="form-group"><label>📂 Business category *</label><select id="businessType"><option value="" disabled selected>– Select –</option><option>Electricals & Electronics</option><option>Groceries</option><option>Food</option><option>Cars & Trucks</option><option>Construction</option><option>Stationary</option><option>Rent</option><option>transportation</option><option>Services</option><option>School</option><option>Jewelry</option><option>Fruits and Veggies</option></select></div>
+        
+        <div class="form-group"><label>🔖 Transaction ID <span style="color:#dc2626;">*</span></label><div style="display: flex; gap: 0.5rem; flex-wrap: wrap;"><input type="text" id="transactionIdField" class="readonly-field" readonly style="flex:1;"><button id="generateIdBtn" class="gen-id-button">🔄 Generate</button></div><div id="txIdError" class="error-text"></div></div>
+        
+        <div class="form-group"><label>📄 Transaction agreement</label><div class="radio-group-row"><label><input type="radio" name="transactionAgreement" value="Yes"> ✅ Yes</label><label><input type="radio" name="transactionAgreement" value="No"> ❌ No</label></div></div>
+        
+        <div class="form-group">
+          <label>📱 Payment Method</label>
+          <div class="method-radio-group">
+            <label style="font-weight:600; background:#ffedd5; padding:0.2rem 0.8rem; border-radius:2rem;">
+              <input type="radio" name="paymentMethod" id="oMoneyRadio" value="oMoney" checked> 🟠 O-Money
+            </label>
+            <label><input type="radio" name="paymentMethod" id="standardRadio" value="standard"> 🔄 Standard (Auto)</label>
+          </div>
+          <div id="oMoneyHint" class="error-text" style="color:#0f5b2d;">✓ O-Money uses #144*2*2*XXXXXX*YYYY*0000# (requires 6-digit identifier)</div>
+        </div>
+        
+        <div class="policy-confirm-area">
+          <button id="showPolicyBtn" class="policy-trigger-btn" style="background:#1e293b; color:white; border:none; padding:0.4rem 0.8rem; border-radius:2rem; font-size:0.75rem; cursor:pointer;">📜 Read Policy</button>
+          <span id="policyStatusMsg" style="color:#b91c1c; font-size:0.7rem;">⚠️ Not confirmed</span>
+        </div>
+        
+        <button id="releaseFundsBtn" class="release-button">📞 Release Funds (Open Dialer)</button>
+        <div id="ussdOutputArea" style="display:none;" class="ussd-output"><strong>USSD Code:</strong><br><code id="ussdCodeText" style="word-break:break-all;"></code><br><button id="copyUssdBtn" class="copy-btn">📋 Copy</button><button id="dialUssdBtn" class="dial-btn">📞 Open Dialer</button></div>
+        
+        <button id="payBtn" class="pay-button">💰 PAY</button>
+        <div id="merchantFeedback" style="display:none; margin-top:0.8rem; padding:0.6rem; border-radius:1rem; font-size:0.75rem;"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
   (function() {
-    // ----- DOM elements -----
-    const video = document.getElementById('qr-video');
-    const startBtn = document.getElementById('startCameraBtn');
-    const stopBtn = document.getElementById('stopCameraBtn');
-    const fileInput = document.getElementById('uploadQR');
-    const qrResultSpan = document.getElementById('qrResultText');
-    const copyBtn = document.getElementById('copyResultBtn');
-    const linkWrapper = document.getElementById('linkWrapper');
-    const statusDiv = document.getElementById('statusMessage');
-    const scanOverlay = document.getElementById('scanOverlay');
-
-    // ----- global state & helper variables -----
-    let mediaStream = null;           // active camera stream
-    let scanningActive = false;       // flag for scanning loop
-    let animationFrameId = null;      // requestAnimationFrame id
-    let lastDecodedData = "";         // avoid repeated identical updates (optional)
+    // ---------- Product data ----------
+    const baseProducts = [
+      { name: "Desktop Set", price: 2500, emoji: "🖥️", category: "Electronics", sku: "DTP-001", description: "" },
+      { name: "System Unit", price: 800, emoji: "💻", category: "Computers", sku: "SYS-002", description: "" },
+      { name: "Monitor", price: 500, emoji: "🖥️", category: "Displays", sku: "MON-003", description: "" },
+      { name: "Kbd+Mouse+Cbl", price: 450, emoji: "🔌", category: "Accessories", sku: "KMC-004", description: "" },
+      { name: "Galaxy A06", price: 120000, emoji: "📱", category: "Mobile", sku: "SGA-005", description: "" },
+      { name: "Galaxy A07", price: 150000, emoji: "📱", category: "Mobile", sku: "SGA-006", description: "" },
+      { name: "Galaxy A16", price: 200000, emoji: "📱", category: "Mobile", sku: "SGA-007", description: "" },
+      { name: "Mobile Accs", price: 450, emoji: "📱🔧", category: "Accessories", sku: "MAC-008", description: "" },
+      { name: "Website Dev", price: 1500, emoji: "🌐", category: "Services", sku: "WEB-009", description: "" },
+      { name: "Mobile App", price: 2500, emoji: "📲", category: "Software", sku: "APP-010", description: "" }
+    ];
     
-    // Hidden canvas for processing frames (off-screen but we attach to DOM not needed, we just create)
-    // Create a canvas element programmatically for high-performance frame grabbing
-    const scanCanvas = document.createElement('canvas');
-    const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
-
-    // ----- Utility: update UI with decoded content -----
-    function updateDecodedResult(text) {
-      if (!text || text.trim() === "") {
-        if (lastDecodedData !== "") {
-          qrResultSpan.innerHTML = "⚠️ No QR code detected yet";
-          linkWrapper.innerHTML = "";
-          lastDecodedData = "";
-        }
-        return;
-      }
-      
-      // Avoid spamming DOM if same content repeated, but we still show. it's fine
-      qrResultSpan.innerHTML = escapeHtml(text);
-      lastDecodedData = text;
-      
-      // Generate helpful link if it's a URL
-      linkWrapper.innerHTML = "";
-      let isUrl = false;
-      let url = text.trim();
-      try {
-        // Check if string looks like http or https URL
-        if (url.startsWith("http://") || url.startsWith("https://")) {
-          isUrl = true;
-        } else if (url.includes(".") && (url.includes("http") === false)) {
-          // simple heuristic: maybe protocol missing? but we try best
-          if (url.match(/^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/|$)/)) {
-            url = "https://" + url;
-            isUrl = true;
-          }
-        } else if (url.startsWith("ftp://") || url.startsWith("file://")) {
-          isUrl = true;
-        }
-        if (isUrl) {
-          const safeUrl = new URL(url);
-          linkWrapper.innerHTML = `<a href="${safeUrl.href}" target="_blank" rel="noopener noreferrer">🔗 Open Link → ${safeUrl.hostname}</a>`;
-        } else if (text.startsWith("mailto:")) {
-          linkWrapper.innerHTML = `<a href="${text}" target="_blank">📧 Send email</a>`;
-        } else {
-          // extra: maybe phone number: tel: pattern
-          if (text.startsWith("tel:")) {
-            linkWrapper.innerHTML = `<a href="${text}">📞 Call this number</a>`;
-          } else if (text.match(/^[\+]?[\d\s\(\)\-]{8,20}$/)) {
-            // if looks like phone number but no prefix
-            linkWrapper.innerHTML = `<a href="tel:${encodeURIComponent(text)}">📞 Dial ${text}</a>`;
-          }
-        }
-      } catch (e) {
-        // not a valid URL, ignore
-        linkWrapper.innerHTML = "";
-      }
-      
-      // success status flash
-      statusDiv.innerHTML = "✅ QR decoded! Ready for next scan.";
-      setTimeout(() => {
-        if (scanningActive) statusDiv.innerHTML = "🔍 Scanning... camera active";
-        else if (!mediaStream) statusDiv.innerHTML = "📁 Camera stopped. Use start or upload";
-      }, 1800);
-    }
+    let products = JSON.parse(JSON.stringify(baseProducts));
+    let customIcons = {};      // sku -> dataUrl
+    let customDetails = {};    // sku -> { name, price, description }
     
-    // simple XSS protection
-    function escapeHtml(str) {
-      return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-      }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-        return c;
+    function loadStorage() {
+      const storedIcons = localStorage.getItem('customProductIcons');
+      if (storedIcons) try { customIcons = JSON.parse(storedIcons); } catch(e) {}
+      const storedDetails = localStorage.getItem('customProductDetails');
+      if (storedDetails) try { customDetails = JSON.parse(storedDetails); } catch(e) {}
+      // merge custom details into products array
+      products = baseProducts.map(p => {
+        const detail = customDetails[p.sku];
+        if (detail) {
+          return { ...p, name: detail.name, price: detail.price, description: detail.description };
+        }
+        return { ...p };
       });
     }
-
-    // ----- Core scanning function (analyzes current video frame) -----
-    function scanVideoFrame() {
-      if (!scanningActive || !video || !video.videoWidth || !video.videoHeight) {
-        // video not ready yet
-        return;
-      }
-      
-      const width = video.videoWidth;
-      const height = video.videoHeight;
-      if (width === 0 || height === 0) return;
-      
-      // set canvas dimensions exactly to video frame size (native resolution)
-      scanCanvas.width = width;
-      scanCanvas.height = height;
-      
-      // draw current video frame onto canvas
-      scanCtx.drawImage(video, 0, 0, width, height);
-      
-      // get image data for jsQR processing
-      const imageData = scanCtx.getImageData(0, 0, width, height);
-      
-      // decode QR code from image data (jsQR is global from CDN)
-      try {
-        const qrCode = jsQR(imageData.data, width, height, {
-          inversionAttempts: "attemptBoth",  // detect inverted qr codes as well
-        });
-        
-        if (qrCode) {
-          const decodedText = qrCode.data;
-          if (decodedText && decodedText !== "") {
-            updateDecodedResult(decodedText);
-            // optional: subtle visual feedback on overlay
-            scanOverlay.style.boxShadow = "inset 0 0 0 3px rgba(0, 255, 170, 0.8)";
-            setTimeout(() => {
-              if (scanOverlay) scanOverlay.style.boxShadow = "inset 0 0 0 2px rgba(0, 255, 255, 0.3)";
-            }, 200);
-          }
+    function saveCustomDetails() {
+      localStorage.setItem('customProductDetails', JSON.stringify(customDetails));
+    }
+    function saveCustomIcons() {
+      localStorage.setItem('customProductIcons', JSON.stringify(customIcons));
+    }
+    
+    let currentProduct = null;
+    let globalStoredProvider = null;
+    let activeProductForModal = null;
+    let pendingIconDataUrl = null;   // temporary store for new icon until payment confirmed
+    
+    // UI Elements
+    const productStrip = document.getElementById('productStripCompact');
+    const amountInput = document.getElementById('amountInput');
+    const selectedInfo = document.getElementById('selectedProductCompactInfo');
+    const pricesButton = document.getElementById('pricesButton');
+    const oMoneyRadio = document.getElementById('oMoneyRadio');
+    const standardRadio = document.getElementById('standardRadio');
+    
+    // Modals
+    const iconModal = document.getElementById('productModal');
+    const editModal = document.getElementById('productEditModal');
+    const modalIconPreview = document.getElementById('modalIconPreview');
+    const modalProductNameSpan = document.getElementById('modalProductName');
+    const modalProductPriceSpan = document.getElementById('modalProductPrice');
+    const modalSelectBtn = document.getElementById('modalSelectProductBtn');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalUploadTrigger = document.getElementById('modalUploadTriggerBtn');
+    const modalImageInput = document.getElementById('modalImageUpload');
+    const modalUploadStatus = document.getElementById('modalUploadStatus');
+    const modalReplaceIconBtn = document.getElementById('modalReplaceIconBtn');
+    
+    // Edit modal elements
+    const editModalIconPreview = document.getElementById('editModalIconPreview');
+    const editName = document.getElementById('editProductName');
+    const editPrice = document.getElementById('editProductPrice');
+    const editDesc = document.getElementById('editProductDescription');
+    const generateTwentyBtn = document.getElementById('generateUssdTwentyBtn');
+    const twentyUssdOutput = document.getElementById('twentyUssdOutput');
+    const twentyUssdCodeSpan = document.getElementById('twentyUssdCode');
+    const copyTwentyBtn = document.getElementById('copyTwentyUssdBtn');
+    const dialTwentyBtn = document.getElementById('dialTwentyUssdBtn');
+    const paymentConfirmationArea = document.getElementById('paymentConfirmationArea');
+    const paymentCheckbox = document.getElementById('paymentConfirmedCheckbox');
+    const saveProductAndIconBtn = document.getElementById('saveProductAndIconBtn');
+    const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+    
+    function rebuildProductStrip() {
+      const container = productStrip;
+      container.innerHTML = '';
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card-compact';
+        const customIcon = customIcons[p.sku];
+        let iconHtml = '';
+        if (customIcon) {
+          iconHtml = `<img class="product-icon" src="${customIcon}" alt="${p.name}">`;
         } else {
-          // optional: no qr found, but don't clear result (keep last result unless we want to reset? But user expects to see new)
-          // we do not auto-clear, only when camera stops or manual reset? Not necessary.
-          // Show a subtle hint if empty but avoid flickering
-          if (lastDecodedData === "" && !qrResultSpan.innerText.includes("Waiting")) {
-            // small idle state
-          }
+          iconHtml = `<span class="product-emoji-fallback">${p.emoji}</span>`;
         }
-      } catch (err) {
-        console.warn("QR scanning error", err);
-      }
-    }
-    
-    // ----- Scanning Loop (requestAnimationFrame) -----
-    function startScanLoop() {
-      if (!scanningActive) return;
-      scanVideoFrame();
-      animationFrameId = requestAnimationFrame(() => startScanLoop());
-    }
-    
-    function stopScanLoop() {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-      }
-      scanningActive = false;
-    }
-    
-    // ----- Camera handling (stop any existing, request new) -----
-    async function startCamera() {
-      // if camera already active, stop gracefully first
-      await stopCamera();
-      
-      // reset scanning flag, ensure loop stopped
-      scanningActive = false;
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      
-      // set status
-      statusDiv.innerHTML = "📷 Requesting camera access...";
-      
-      try {
-        // Request back camera on mobile (environment), fallback to any camera
-        const constraints = {
-          video: {
-            facingMode: { exact: "environment" }
-          }
+        card.innerHTML = `
+          <div class="product-icon-container">${iconHtml}</div>
+          <div class="product-name-compact">${p.name}</div>
+          <div class="product-price-compact">${p.price.toLocaleString()} L</div>
+        `;
+        card.onclick = (e) => {
+          e.stopPropagation();
+          openIconModal(p);
         };
-        
-        // fallback if environment fails
-        let stream;
-        try {
-          stream = await navigator.mediaDevices.getUserMedia(constraints);
-        } catch (envErr) {
-          console.warn("Back camera not available, trying default:", envErr);
-          stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        }
-        
-        mediaStream = stream;
-        video.srcObject = stream;
-        await video.play();
-        
-        // Wait until video metadata loaded so we have dimensions
-        await new Promise((resolve) => {
-          if (video.videoWidth > 0 && video.videoHeight > 0) {
-            resolve();
-          } else {
-            video.addEventListener('loadedmetadata', () => resolve(), { once: true });
-          }
-        });
-        
-        // extra safety: if dimensions still 0, wait a tick
-        if (video.videoWidth === 0 || video.videoHeight === 0) {
-          await new Promise(r => setTimeout(r, 100));
-        }
-        
-        // start scanning
-        scanningActive = true;
-        startScanLoop();
-        
-        statusDiv.innerHTML = "🔍 Camera active - scanning for QR codes...";
-        scanOverlay.style.boxShadow = "inset 0 0 0 2px rgba(0, 255, 255, 0.3)";
-        // optional: clear previous result if needed? Not required but user might want fresh state? leave old.
-        if (lastDecodedData !== "") {
-          // keep old result but not mandatory, user can see new ones
-          statusDiv.innerHTML += " (new scan will update result)";
-        }
-      } catch (err) {
-        console.error("Camera error:", err);
-        let errorMsg = "Camera unavailable: ";
-        if (err.name === "NotAllowedError") errorMsg += "Permission denied. Allow camera access.";
-        else if (err.name === "NotFoundError") errorMsg += "No camera detected on this device.";
-        else errorMsg += err.message || "Could not start video stream.";
-        statusDiv.innerHTML = `❌ ${errorMsg}`;
-        scanningActive = false;
-        mediaStream = null;
-        video.srcObject = null;
-      }
+        container.appendChild(card);
+      });
     }
     
-    // ----- Stop camera and scanning fully -----
-    async function stopCamera() {
-      // stop scanning loop
-      if (scanningActive) {
-        scanningActive = false;
-      }
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-      }
-      
-      // stop all tracks from active stream
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(track => {
-          if (track.readyState === 'live') track.stop();
-        });
-        mediaStream = null;
-      }
-      if (video) {
-        video.srcObject = null;
-        video.pause();
-      }
-      statusDiv.innerHTML = "⏸️ Camera stopped. You can start again or upload image.";
-      scanOverlay.style.boxShadow = "none";
-      // do not clear last decoded result by default (user may keep)
-    }
-    
-    // ----- Upload file & decode QR -----
-    function decodeQRFromFile(file) {
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          // set canvas size to image dimensions
-          const w = img.width;
-          const h = img.height;
-          if (w === 0 || h === 0) {
-            statusDiv.innerHTML = "❌ Invalid image dimensions";
-            return;
-          }
-          scanCanvas.width = w;
-          scanCanvas.height = h;
-          scanCtx.drawImage(img, 0, 0, w, h);
-          const imageData = scanCtx.getImageData(0, 0, w, h);
-          try {
-            const qr = jsQR(imageData.data, w, h, { inversionAttempts: "attemptBoth" });
-            if (qr && qr.data) {
-              updateDecodedResult(qr.data);
-              statusDiv.innerHTML = "📸 QR successfully read from image!";
-              // flash effect on result card
-              const card = document.getElementById('resultCard');
-              if (card) card.style.transition = "0.1s";
-            } else {
-              qrResultSpan.innerHTML = "❌ No QR code found in this image.";
-              linkWrapper.innerHTML = "";
-              statusDiv.innerHTML = "⚠️ Could not detect any QR code. Try another image or better lighting.";
-              lastDecodedData = "";
-            }
-          } catch (err) {
-            console.error(err);
-            qrResultSpan.innerHTML = "⚠️ Error decoding image.";
-            statusDiv.innerHTML = "Decoding failed (invalid format or corrupted)";
-            lastDecodedData = "";
-          }
-        };
-        img.onerror = () => {
-          statusDiv.innerHTML = "❌ Failed to load image. Unsupported format.";
-          qrResultSpan.innerHTML = "Image load error";
-        };
-        img.src = e.target.result;
-      };
-      reader.onerror = () => {
-        statusDiv.innerHTML = "File read error";
-      };
-      reader.readAsDataURL(file);
-    }
-    
-    // ----- file input change handler -----
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      // if camera scanning is active, we don't interfere but optionally show note
-      if (scanningActive) {
-        statusDiv.innerHTML = "📂 Scanning image while camera is active (both work)";
+    function openIconModal(product) {
+      activeProductForModal = product;
+      modalProductNameSpan.innerText = product.name;
+      modalProductPriceSpan.innerText = product.price.toLocaleString();
+      const customIcon = customIcons[product.sku];
+      if (customIcon) {
+        modalIconPreview.innerHTML = `<img class="icon-preview" src="${customIcon}" alt="Product icon">`;
       } else {
-        statusDiv.innerHTML = "📄 Analyzing uploaded image...";
+        modalIconPreview.innerHTML = `<span class="emoji-large">${product.emoji}</span>`;
       }
-      decodeQRFromFile(file);
-      // reset file input value to allow re-upload same file
-      event.target.value = '';
+      iconModal.classList.add('active');
     }
     
-    // ----- copy result to clipboard -----
-    async function copyResultToClipboard() {
-      const textToCopy = lastDecodedData || qrResultSpan.innerText;
-      if (!textToCopy || textToCopy.includes("Waiting") || textToCopy.includes("No QR")) {
-        statusDiv.innerHTML = "⚠️ Nothing to copy — no QR code data available.";
+    function closeIconModal() {
+      iconModal.classList.remove('active');
+      modalUploadStatus.innerText = 'No image selected.';
+    }
+    
+    function openEditModal(product, tempIconDataUrl) {
+      editName.value = product.name;
+      editPrice.value = product.price;
+      editDesc.value = product.description || '';
+      // show preview of new icon
+      if (tempIconDataUrl) {
+        editModalIconPreview.innerHTML = `<img class="icon-preview" src="${tempIconDataUrl}" alt="New icon preview">`;
+      } else {
+        const existingIcon = customIcons[product.sku];
+        if (existingIcon) {
+          editModalIconPreview.innerHTML = `<img class="icon-preview" src="${existingIcon}" alt="Current icon">`;
+        } else {
+          editModalIconPreview.innerHTML = `<span class="emoji-large">${product.emoji}</span>`;
+        }
+      }
+      twentyUssdOutput.style.display = 'none';
+      paymentConfirmationArea.style.display = 'none';
+      paymentCheckbox.checked = false;
+      saveProductAndIconBtn.disabled = true;
+      editModal.classList.add('active');
+    }
+    
+    function closeEditModal() {
+      editModal.classList.remove('active');
+      pendingIconDataUrl = null;
+    }
+    
+    function selectProduct(product) {
+      currentProduct = product;
+      amountInput.value = product.price;
+      selectedInfo.style.display = 'inline-block';
+      selectedInfo.innerHTML = `✅ Selected: ${product.name} (${product.price.toLocaleString()} Le) — Click "Prices" for details`;
+      amountInput.dispatchEvent(new Event('input'));
+      pricesButton.classList.add('highlight-green');
+      document.querySelectorAll('.product-card-compact').forEach(c => c.style.backgroundColor = '');
+    }
+    
+    // Image handling
+    function readImageAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    
+    let uploadedImageDataUrl = null;
+    
+    modalUploadTrigger.onclick = () => modalImageInput.click();
+    modalImageInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        modalUploadStatus.innerText = '❌ Please select an image file.';
+        modalUploadStatus.style.color = '#b91c1c';
         return;
       }
+      modalUploadStatus.innerText = '📤 Reading image...';
+      modalUploadStatus.style.color = '#0f5b2d';
       try {
-        await navigator.clipboard.writeText(lastDecodedData);
-        statusDiv.innerHTML = "📋 Copied to clipboard!";
-        setTimeout(() => {
-          if (scanningActive) statusDiv.innerHTML = "🔍 Scanning...";
-          else if (!mediaStream) statusDiv.innerHTML = "📁 Ready (camera off)";
-        }, 1500);
+        const dataUrl = await readImageAsDataURL(file);
+        uploadedImageDataUrl = dataUrl;
+        modalUploadStatus.innerText = `✅ Image loaded. Click "Proceed to Edit & Payment".`;
+        modalUploadStatus.style.color = '#0f5b2d';
       } catch (err) {
-        statusDiv.innerHTML = "❌ Could not copy, manual selection needed";
-        console.error(err);
+        modalUploadStatus.innerText = `❌ Failed: ${err.message}`;
+        modalUploadStatus.style.color = '#b91c1c';
+        uploadedImageDataUrl = null;
       }
-    }
+      modalImageInput.value = '';
+    };
     
-    // ----- attach event listeners & initial UI helpers -----
-    function initEventListeners() {
-      startBtn.addEventListener('click', startCamera);
-      stopBtn.addEventListener('click', stopCamera);
-      fileInput.addEventListener('change', handleFileUpload);
-      copyBtn.addEventListener('click', copyResultToClipboard);
-    }
-    
-    // On page load: set initial state, no camera auto-start to respect user action
-    function init() {
-      initEventListeners();
-      // ensure canvas context exists
-      if (!scanCtx) console.warn("canvas context missing");
-      statusDiv.innerHTML = "✨ Ready. Click 'Start Camera' to scan live, or upload an image.";
-      qrResultSpan.innerHTML = "— Waiting for QR code —";
-      linkWrapper.innerHTML = "";
-      lastDecodedData = "";
-      // stop any possible ghost stream on page reload (safety)
-      if (video.srcObject) {
-        stopCamera();
+    modalReplaceIconBtn.onclick = () => {
+      if (!activeProductForModal) return;
+      if (uploadedImageDataUrl) {
+        pendingIconDataUrl = uploadedImageDataUrl;
+        // open edit modal with pending icon preview
+        openEditModal(activeProductForModal, pendingIconDataUrl);
+        closeIconModal();
+        uploadedImageDataUrl = null;
+      } else {
+        modalUploadStatus.innerText = '⚠️ No image loaded. Please select an image first.';
+        modalUploadStatus.style.color = '#b91c1c';
       }
-    }
+    };
     
-    // optional: ensure when page unload, camera stops
-    window.addEventListener('beforeunload', () => {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(t => t.stop());
+    modalSelectBtn.onclick = () => {
+      if (activeProductForModal) {
+        selectProduct(activeProductForModal);
+        closeIconModal();
+      }
+    };
+    modalCloseBtn.onclick = closeIconModal;
+    
+    // Generate USSD (20% of price)
+    generateTwentyBtn.onclick = () => {
+      const identifier = document.getElementById('merchantIdentifier').value.trim();
+      if (!identifier) {
+        alert('Business identifier missing. Please complete partnership registration first.');
+        return;
+      }
+      const price = parseFloat(editPrice.value);
+      if (isNaN(price) || price <= 0) {
+        alert('Please enter a valid product price (positive number).');
+        return;
+      }
+      const twentyPercent = Math.floor(price * 0.2);
+      if (twentyPercent <= 0) {
+        alert('20% of price is zero. Please increase price.');
+        return;
+      }
+      const ussd = `#144*2*2*${identifier}*${twentyPercent}*0000#`;
+      twentyUssdCodeSpan.innerText = ussd;
+      twentyUssdOutput.style.display = 'block';
+      paymentConfirmationArea.style.display = 'block';
+      // re-check checkbox status
+      if (paymentCheckbox.checked) {
+        saveProductAndIconBtn.disabled = false;
+      } else {
+        saveProductAndIconBtn.disabled = true;
+      }
+    };
+    
+    paymentCheckbox.addEventListener('change', () => {
+      if (paymentCheckbox.checked) {
+        saveProductAndIconBtn.disabled = false;
+      } else {
+        saveProductAndIconBtn.disabled = true;
       }
     });
     
-    init();
+    copyTwentyBtn.onclick = () => {
+      const code = twentyUssdCodeSpan.innerText;
+      if (code) {
+        navigator.clipboard.writeText(code);
+        copyTwentyBtn.innerText = '✅ Copied!';
+        setTimeout(() => copyTwentyBtn.innerText = '📋 Copy', 1500);
+      }
+    };
+    dialTwentyBtn.onclick = () => {
+      const code = twentyUssdCodeSpan.innerText;
+      if (code) window.location.href = `tel:${encodeURIComponent(code)}`;
+    };
+    
+    // Save product details AND replace icon (only if payment confirmed)
+    saveProductAndIconBtn.onclick = () => {
+      if (!activeProductForModal) return;
+      if (!paymentCheckbox.checked) {
+        alert('Please confirm payment by checking the box.');
+        return;
+      }
+      const newName = editName.value.trim();
+      const newPrice = parseFloat(editPrice.value);
+      if (!newName || isNaN(newPrice) || newPrice <= 0) {
+        alert('Please enter a valid product name and positive price.');
+        return;
+      }
+      const newDesc = editDesc.value.trim();
+      // Save product details
+      customDetails[activeProductForModal.sku] = {
+        name: newName,
+        price: newPrice,
+        description: newDesc
+      };
+      saveCustomDetails();
+      // Save custom icon if pending
+      if (pendingIconDataUrl) {
+        customIcons[activeProductForModal.sku] = pendingIconDataUrl;
+        saveCustomIcons();
+      }
+      // Refresh products array
+      products = baseProducts.map(p => {
+        const detail = customDetails[p.sku];
+        if (detail) return { ...p, name: detail.name, price: detail.price, description: detail.description };
+        return { ...p };
+      });
+      rebuildProductStrip();
+      // If this product was currently selected, update selection
+      if (currentProduct && currentProduct.sku === activeProductForModal.sku) {
+        currentProduct = products.find(p => p.sku === activeProductForModal.sku);
+        amountInput.value = currentProduct.price;
+        selectedInfo.innerHTML = `✅ Selected: ${currentProduct.name} (${currentProduct.price.toLocaleString()} Le) — Click "Prices" for details`;
+      }
+      closeEditModal();
+      alert('✅ Product icon and details saved successfully! Payment confirmed.');
+    };
+    
+    closeEditModalBtn.onclick = closeEditModal;
+    
+    // ---------- Existing partnership, USSD, payment logic (preserved) ----------
+    const REGISTRATION_ENDPOINT = "https://formspree.io/f/mzdqdbeb";
+    const GROUP_ONE = ["076","074","073","079","078","075"];
+    const GROUP_TWO = ["077","088","099","080","090","070","030","033"];
+    
+    const partnershipModalElem = document.getElementById('partnershipModal');
+    const partnershipBiz = document.getElementById('partnershipBizName');
+    const partnershipAddr = document.getElementById('partnershipAddress');
+    const partnershipEmail = document.getElementById('partnershipEmail');
+    const partnershipRec = document.getElementById('partnershipRecipientName');
+    const partnershipId = document.getElementById('partnershipIdentifier');
+    const partnershipPos = document.getElementById('partnershipPosition');
+    const partnershipProviderArea = document.getElementById('partnershipProviderArea');
+    const afriRadio = document.querySelector('input[name="partnershipProvider"][value="afrimoney"]');
+    const orangeRadio = document.querySelector('input[name="partnershipProvider"][value="orangemoney"]');
+    let selectedProviderTemp = null;
+    
+    const mBiz = document.getElementById('merchantBizName');
+    const mAddr = document.getElementById('merchantAddress');
+    const mId = document.getElementById('merchantIdentifier');
+    const mPos = document.getElementById('merchantPosition');
+    const serialField = document.getElementById('serialNumberField');
+    const recipientField = document.getElementById('recipientNameField');
+    const dispBiz = document.getElementById('displayBizName');
+    const dispAddr = document.getElementById('displayAddress');
+    const dispId = document.getElementById('displayIdentifier');
+    const dispPos = document.getElementById('displayPosition');
+    const dispRec = document.getElementById('displayRecipientName');
+    
+    function checkPartnershipIdentifier() {
+      const idValue = partnershipId.value.trim();
+      if (/^\d{6}$/.test(idValue)) {
+        partnershipProviderArea.style.display = 'block';
+        if (afriRadio) afriRadio.checked = false;
+        if (orangeRadio) orangeRadio.checked = false;
+        selectedProviderTemp = null;
+        const hint = document.getElementById('partnershipProviderHint');
+        if (hint) hint.innerText = "✓ 6-digit code. Select default provider for Standard mode.";
+      } else {
+        partnershipProviderArea.style.display = 'none';
+        selectedProviderTemp = null;
+      }
+    }
+    partnershipId.addEventListener('input', checkPartnershipIdentifier);
+    if (afriRadio) afriRadio.addEventListener('change', () => { if (afriRadio.checked) selectedProviderTemp = 'afrimoney'; });
+    if (orangeRadio) orangeRadio.addEventListener('change', () => { if (orangeRadio.checked) selectedProviderTemp = 'orangemoney'; });
+    
+    function generateStandardUssd(identifier, amountValue) {
+      const is6Digit = /^\d{6}$/.test(identifier);
+      const is9Digit = /^\d{9}$/.test(identifier);
+      const amount = parseInt(amountValue);
+      if (is9Digit) {
+        const prefix = identifier.substring(0,3);
+        if (GROUP_ONE.includes(prefix)) return `#144*2*1*${identifier}*${amount}*${amount}#`;
+        else if (GROUP_TWO.includes(prefix)) return `*161*1*1*${identifier}*${amount}*0000#`;
+        return null;
+      } 
+      else if (is6Digit && globalStoredProvider) {
+        if (globalStoredProvider === 'afrimoney') return `*161*1*2*${identifier}*${amount}*0000#`;
+        else if (globalStoredProvider === 'orangemoney') return `#144*2*2*${identifier}*${amount}*0000#`;
+        return null;
+      }
+      return null;
+    }
+    
+    function generateOMoneyUssd(identifier, amountValue) {
+      const amount = parseInt(amountValue);
+      if (!/^\d{6}$/.test(identifier)) return null;
+      return `#144*2*2*${identifier}*${amount}*0000#`;
+    }
+    
+    pricesButton.onclick = () => {
+      if (!currentProduct) { showFeedback("⚠️ No product selected. Click a product card and then 'Select this product'.", "error"); return; }
+      alert(`📦 Product Details\n\nName: ${currentProduct.name}\nPrice: ${currentProduct.price.toLocaleString()} Le\nCategory: ${currentProduct.category}\nSKU: ${currentProduct.sku}\nDescription: ${currentProduct.description || '—'}`);
+    };
+    
+    const scrollContainer = productStrip;
+    document.getElementById('scrollLeftBtn').onclick = () => scrollContainer.scrollBy({ left: -130, behavior: 'smooth' });
+    document.getElementById('scrollRightBtn').onclick = () => scrollContainer.scrollBy({ left: 130, behavior: 'smooth' });
+    
+    let serialCounter = 1;
+    const SERIAL_KEY = "global_serial_counter";
+    function loadSerial() { const stored = localStorage.getItem(SERIAL_KEY); serialCounter = (stored && !isNaN(parseInt(stored))) ? parseInt(stored) : 1; localStorage.setItem(SERIAL_KEY, serialCounter); }
+    function incrementSerial() { serialCounter++; localStorage.setItem(SERIAL_KEY, serialCounter); }
+    function randDigits(len) { return Math.floor(Math.random()*Math.pow(10,len)).toString().padStart(len,'0'); }
+    function genTxId() { return `NW${randDigits(7)}.${randDigits(5)}.M${randDigits(7)}`; }
+    
+    function isRegistered() { return localStorage.getItem('partnershipRegistered') === 'true'; }
+    function savePartnership(data) { localStorage.setItem('partnershipRegistered', 'true'); localStorage.setItem('partnershipData', JSON.stringify(data)); }
+    function clearPartnership() { localStorage.removeItem('partnershipRegistered'); localStorage.removeItem('partnershipData'); globalStoredProvider = null; }
+    
+    function fillMainForms(data) {
+      mBiz.value = data.businessName || ''; mAddr.value = data.address || ''; mId.value = data.identifier || ''; mPos.value = data.position || '';
+      serialField.value = data.serialNumber || '--'; recipientField.value = data.recipientName || '';
+      dispBiz.innerText = data.businessName || '—'; dispAddr.innerText = data.address || '—'; dispId.innerText = data.identifier || '—';
+      dispPos.innerText = data.position || '—'; dispRec.innerText = data.recipientName || '—';
+      globalStoredProvider = data.provider || null;
+    }
+    
+    function showPartnershipError(msg) {
+      const errorDiv = document.getElementById('partnershipModalError');
+      errorDiv.style.display = 'block';
+      errorDiv.innerText = msg;
+      setTimeout(() => errorDiv.style.display = 'none', 3000);
+    }
+    
+    function validatePartnership() {
+      const biz = partnershipBiz.value.trim(), addr = partnershipAddr.value.trim(), email = partnershipEmail.value.trim();
+      const rec = partnershipRec.value.trim(), id = partnershipId.value.trim(), pos = partnershipPos.value;
+      if (!biz || !addr || !email || !rec || !id || !pos) { showPartnershipError("All fields required."); return false; }
+      if (!/^\S+@\S+\.\S+$/.test(email)) { showPartnershipError("Invalid email."); return false; }
+      const is9d = /^\d{9}$/.test(id), is6c = /^\d{6}$/.test(id);
+      if (!is9d && !is6c) { showPartnershipError("Identifier: 9 digits or 6 digits."); return false; }
+      if (is6c && !selectedProviderTemp) { showPartnershipError("For 6-digit code, please select a default provider."); return false; }
+      return true;
+    }
+    
+    function completePartnership() {
+      if (!validatePartnership()) return;
+      const serialNum = `SN-${String(serialCounter).padStart(5,'0')}`;
+      const partnershipData = {
+        businessName: partnershipBiz.value.trim(), address: partnershipAddr.value.trim(), email: partnershipEmail.value.trim(),
+        recipientName: partnershipRec.value.trim(), identifier: partnershipId.value.trim(), position: partnershipPos.value,
+        provider: selectedProviderTemp, serialNumber: serialNum, registeredAt: new Date().toISOString()
+      };
+      savePartnership(partnershipData);
+      fillMainForms(partnershipData);
+      incrementSerial();
+      document.getElementById('transactionIdField').value = genTxId();
+      partnershipModalElem.classList.add('hidden');
+      partnershipBiz.value = ''; partnershipAddr.value = ''; partnershipEmail.value = ''; partnershipRec.value = '';
+      partnershipId.value = ''; partnershipPos.value = ''; 
+      if (afriRadio) afriRadio.checked = false; if (orangeRadio) orangeRadio.checked = false;
+      selectedProviderTemp = null; partnershipProviderArea.style.display = 'none';
+      fetch(REGISTRATION_ENDPOINT, { method: "POST", body: new FormData(Object.entries(partnershipData)) }).catch(e=>console.log);
+    }
+    
+    function fullReset() {
+      clearPartnership();
+      mBiz.value = ''; mAddr.value = ''; mId.value = ''; mPos.value = ''; serialField.value = '--'; recipientField.value = '';
+      dispBiz.innerText = '—'; dispAddr.innerText = '—'; dispId.innerText = '—'; dispPos.innerText = '—'; dispRec.innerText = '—';
+      document.getElementById('transactionIdField').value = '';
+      amountInput.value = ''; document.getElementById('businessType').value = '';
+      document.querySelectorAll('input[name="transactionAgreement"]').forEach(r => r.checked = false);
+      document.getElementById('ussdOutputArea').style.display = 'none';
+      selectedInfo.style.display = 'none'; selectedInfo.innerHTML = ''; currentProduct = null;
+      pricesButton.classList.remove('highlight-green');
+      policyOkFlag = false; policyStatusSpan.innerHTML = "⚠️ Not confirmed"; policyStatusSpan.style.color = "#b91c1c";
+      partnershipModalElem.classList.remove('hidden');
+      globalStoredProvider = null;
+    }
+    
+    const policyModalElem = document.getElementById('policyModal');
+    const showPolicyBtn = document.getElementById('showPolicyBtn');
+    const policyOkBtn = document.getElementById('policyOkBtn');
+    let policyOkFlag = false;
+    const policyStatusSpan = document.getElementById('policyStatusMsg');
+    showPolicyBtn.onclick = () => { policyModalElem.classList.add('active'); };
+    policyOkBtn.onclick = () => { policyOkFlag = true; policyStatusSpan.innerHTML = "✅ Policy agreed"; policyStatusSpan.style.color = "#15803d"; policyModalElem.classList.remove('active'); };
+    
+    const feedback = document.getElementById('merchantFeedback');
+    function showFeedback(msg, type) { feedback.style.display = 'block'; feedback.innerHTML = msg; feedback.style.background = type === 'error' ? '#fee2e2' : '#e0f2fe'; feedback.style.borderLeft = `4px solid ${type === 'error' ? '#dc2626' : '#0284c7'}`; if (type !== 'error') setTimeout(() => feedback.style.display = 'none', 5000); }
+    
+    const release = document.getElementById('releaseFundsBtn');
+    const ussdArea = document.getElementById('ussdOutputArea');
+    const ussdCodeSpan = document.getElementById('ussdCodeText');
+    const copyUssd = document.getElementById('copyUssdBtn');
+    const dialUssd = document.getElementById('dialUssdBtn');
+    const txField = document.getElementById('transactionIdField');
+    
+    function handleRelease() {
+      if (!txField.value) { showFeedback("Generate Transaction ID first", "error"); return; }
+      const identifier = mId.value.trim();
+      const amountVal = amountInput.value.trim();
+      if (!identifier) { showFeedback("Identifier missing", "error"); return; }
+      if (!amountVal || isNaN(amountVal) || parseInt(amountVal) <= 0) { document.getElementById('amountError').innerText = "Valid amount needed"; showFeedback("Enter amount", "error"); return; }
+      let finalUssd = null;
+      if (oMoneyRadio.checked) {
+        if (!/^\d{6}$/.test(identifier)) { showFeedback("O-Money requires 6-digit identifier.", "error"); ussdArea.style.display = 'none'; return; }
+        finalUssd = generateOMoneyUssd(identifier, amountVal);
+      } else {
+        finalUssd = generateStandardUssd(identifier, amountVal);
+        if (!finalUssd && /^\d{6}$/.test(identifier) && !globalStoredProvider) showFeedback("Standard mode: 6-digit needs default provider.", "error");
+      }
+      if (!finalUssd) { showFeedback("USSD generation failed", "error"); ussdArea.style.display = 'none'; return; }
+      ussdCodeSpan.innerText = finalUssd;
+      ussdArea.style.display = 'block';
+      window.location.href = `tel:${encodeURIComponent(finalUssd)}`;
+    }
+    release.onclick = handleRelease;
+    copyUssd.onclick = () => { if (ussdCodeSpan.innerText) { navigator.clipboard.writeText(ussdCodeSpan.innerText); copyUssd.innerText = "✅ Copied!"; setTimeout(() => copyUssd.innerText = "📋 Copy", 1500); } };
+    dialUssd.onclick = () => { if (ussdCodeSpan.innerText) window.location.href = `tel:${encodeURIComponent(ussdCodeSpan.innerText)}`; else showFeedback("No USSD", "error"); };
+    
+    const pay = document.getElementById('payBtn');
+    function processPay() {
+      if (!policyOkFlag) { showFeedback("Please read and agree to the policy first.", "error"); return; }
+      if (!isRegistered()) { showFeedback("Partnership registration required.", "error"); return; }
+      showFeedback("✅ Payment recorded successfully! Transaction submitted.", "success");
+      setTimeout(() => {
+        amountInput.value = ''; document.getElementById('businessType').value = '';
+        document.querySelectorAll('input[name="transactionAgreement"]').forEach(r => r.checked = false);
+        ussdArea.style.display = 'none'; selectedInfo.style.display = 'none'; selectedInfo.innerHTML = ''; currentProduct = null;
+        pricesButton.classList.remove('highlight-green');
+        document.getElementById('transactionIdField').value = genTxId();
+      }, 2000);
+    }
+    pay.onclick = processPay;
+    document.getElementById('generateIdBtn').onclick = () => { txField.value = genTxId(); showFeedback("New TX ID generated", "info"); };
+    amountInput.oninput = () => { const err = document.getElementById('amountError'); if (amountInput.value && parseInt(amountInput.value) > 0) err.innerText = ""; else if (amountInput.value) err.innerText = "Positive number"; else err.innerText = ""; };
+    document.getElementById('resetRegistrationBtn').onclick = fullReset;
+    document.getElementById('confirmPartnershipBtn').onclick = completePartnership;
+    
+    if (oMoneyRadio) oMoneyRadio.checked = true;
+    if (standardRadio) standardRadio.checked = false;
+    
+    loadStorage();
+    rebuildProductStrip();
+    if (isRegistered()) {
+      const savedData = localStorage.getItem('partnershipData');
+      if (savedData) { try { fillMainForms(JSON.parse(savedData)); } catch(e) {} }
+      if (!txField.value) txField.value = genTxId();
+      partnershipModalElem.classList.add('hidden');
+    } else {
+      partnershipModalElem.classList.remove('hidden');
+    }
+    loadSerial();
   })();
 </script>
 </body>
