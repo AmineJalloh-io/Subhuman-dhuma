@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>QR Code Reader | Live Camera + File Upload</title>
+  <!-- jsQR library: lightweight, robust QR decoding from image data -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #101418 0%, #1a1f2a 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    /* main card container */
+    .reader-container {
+      max-width: 680px;
+      width: 100%;
+      background: rgba(20, 25, 35, 0.8);
+      backdrop-filter: blur(2px);
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #E6F7FF, #A0D2FF);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-align: center;
+      letter-spacing: -0.3px;
+      margin-bottom: 0.3rem;
+    }
+
+    .sub {
+      text-align: center;
+      color: #8f9bb3;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px dashed #2c3240;
+      display: inline-block;
+      width: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    /* video preview area */
+    .video-wrapper {
+      background: #000000;
+      border-radius: 1.8rem;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.1);
+      margin-bottom: 1.3rem;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    video {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      aspect-ratio: 4 / 3;
+      background: #0a0c12;
+    }
+
+    /* scanning overlay effect (purely visual) */
+    .scan-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      border-radius: 1.8rem;
+      box-shadow: inset 0 0 0 2px rgba(0, 255, 255, 0.3);
+      transition: 0.2s;
+    }
+
+    /* button group */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+      margin: 1.2rem 0 1rem;
+    }
+
+    button, .file-label {
+      background: #2a2f3c;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 3rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #eef2ff;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button i, .file-label i {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    button:hover, .file-label:hover {
+      background: #3d4456;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: #2b6ef0;
+      color: white;
+      box-shadow: 0 4px 12px rgba(43, 110, 240, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #1a5ad9;
+    }
+
+    .btn-danger {
+      background: #3b2c2f;
+      color: #ffb4a2;
+    }
+
+    .btn-danger:hover {
+      background: #5c3e3e;
+      color: #ffcdbc;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* result panel */
+    .result-card {
+      background: rgba(10, 14, 23, 0.75);
+      border-radius: 1.8rem;
+      padding: 1rem 1.2rem;
+      margin-top: 1.2rem;
+      border: 1px solid rgba(72, 187, 255, 0.2);
+      backdrop-filter: blur(4px);
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      margin-bottom: 0.7rem;
+      border-bottom: 1px dashed #2e3a48;
+      padding-bottom: 0.5rem;
+    }
+
+    .result-header span {
+      font-weight: 600;
+      letter-spacing: 1px;
+      font-size: 0.85rem;
+      background: #1e88e5;
+      padding: 0.2rem 0.8rem;
+      border-radius: 40px;
+      color: white;
+    }
+
+    .copy-btn {
+      background: transparent;
+      box-shadow: none;
+      padding: 0.2rem 0.8rem;
+      font-size: 0.7rem;
+      background: #2d3748;
+    }
+
+    .qr-data {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      word-break: break-all;
+      white-space: pre-wrap;
+      color: #ccdeee;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      max-height: 150px;
+      overflow-y: auto;
+      padding: 0.3rem 0;
+    }
+
+    .link-hint {
+      margin-top: 8px;
+    }
+
+    .link-hint a {
+      color: #6bc4ff;
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px dashed;
+    }
+
+    .status-msg {
+      font-size: 0.8rem;
+      color: #9aa9c1;
+      text-align: center;
+      margin-top: 0.7rem;
+    }
+
+    .error-msg {
+      color: #ffa098;
+      background: #3a1e1e80;
+      border-radius: 30px;
+      padding: 0.3rem 1rem;
+      display: inline-block;
+    }
+
+    footer {
+      font-size: 0.7rem;
+      text-align: center;
+      color: #5b687c;
+      margin-top: 1.2rem;
+    }
+
+    @media (max-width: 550px) {
+      .reader-container {
+        padding: 1rem;
+      }
+      button, .file-label {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="reader-container">
+  <h1>📷 QR Code Reader</h1>
+  <div style="text-align: center;"><span class="sub">Any type · Live scan · File upload</span></div>
+
+  <!-- Camera preview area -->
+  <div class="video-wrapper">
+    <video id="qr-video" playsinline autoplay muted></video>
+    <div class="scan-overlay" id="scanOverlay"></div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="button-group">
+    <button id="startCameraBtn" class="btn-primary">📸 Start Camera</button>
+    <button id="stopCameraBtn" class="btn-danger">⏹️ Stop Camera</button>
+    <label for="uploadQR" class="file-label">📂 Upload Image</label>
+    <input type="file" id="uploadQR" accept="image/*, image/jpeg, image/png, image/webp">
+  </div>
+
+  <!-- Decoded result section -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <span>🔍 DECODED DATA</span>
+      <button id="copyResultBtn" class="copy-btn" style="font-size:0.7rem;">📋 Copy</button>
+    </div>
+    <div class="qr-data" id="qrResultText">
+      — Waiting for QR code —
+    </div>
+    <div id="linkWrapper" class="link-hint"></div>
+    <div class="status-msg" id="statusMessage">
+      ⚡ Use "Start Camera" & point at any QR code
+    </div>
+  </div>
+  <footer>
+    ⚡ Supports URLs, text, contact, WIFI, any QR content • Works on mobile & desktop
+  </footer>
+</div>
+
+<script>
+  (function() {
+    // ----- DOM elements -----
+    const video = document.getElementById('qr-video');
+    const startBtn = document.getElementById('startCameraBtn');
+    const stopBtn = document.getElementById('stopCameraBtn');
+    const fileInput = document.getElementById('uploadQR');
+    const qrResultSpan = document.getElementById('qrResultText');
+    const copyBtn = document.getElementById('copyResultBtn');
+    const linkWrapper = document.getElementById('linkWrapper');
+    const statusDiv = document.getElementById('statusMessage');
+    const scanOverlay = document.getElementById('scanOverlay');
+
+    // ----- global state & helper variables -----
+    let mediaStream = null;           // active camera stream
+    let scanningActive = false;       // flag for scanning loop
+    let animationFrameId = null;      // requestAnimationFrame id
+    let lastDecodedData = "";         // avoid repeated identical updates (optional)
+    
+    // Hidden canvas for processing frames (off-screen but we attach to DOM not needed, we just create)
+    // Create a canvas element programmatically for high-performance frame grabbing
+    const scanCanvas = document.createElement('canvas');
+    const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+
+    // ----- Utility: update UI with decoded content -----
+    function updateDecodedResult(text) {
+      if (!text || text.trim() === "") {
+        if (lastDecodedData !== "") {
+          qrResultSpan.innerHTML = "⚠️ No QR code detected yet";
+          linkWrapper.innerHTML = "";
+          lastDecodedData = "";
+        }
+        return;
+      }
+      
+      // Avoid spamming DOM if same content repeated, but we still show. it's fine
+      qrResultSpan.innerHTML = escapeHtml(text);
+      lastDecodedData = text;
+      
+      // Generate helpful link if it's a URL
+      linkWrapper.innerHTML = "";
+      let isUrl = false;
+      let url = text.trim();
+      try {
+        // Check if string looks like http or https URL
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+          isUrl = true;
+        } else if (url.includes(".") && (url.includes("http") === false)) {
+          // simple heuristic: maybe protocol missing? but we try best
+          if (url.match(/^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/|$)/)) {
+            url = "https://" + url;
+            isUrl = true;
+          }
+        } else if (url.startsWith("ftp://") || url.startsWith("file://")) {
+          isUrl = true;
+        }
+        if (isUrl) {
+          const safeUrl = new URL(url);
+          linkWrapper.innerHTML = `<a href="${safeUrl.href}" target="_blank" rel="noopener noreferrer">🔗 Open Link → ${safeUrl.hostname}</a>`;
+        } else if (text.startsWith("mailto:")) {
+          linkWrapper.innerHTML = `<a href="${text}" target="_blank">📧 Send email</a>`;
+        } else {
+          // extra: maybe phone number: tel: pattern
+          if (text.startsWith("tel:")) {
+            linkWrapper.innerHTML = `<a href="${text}">📞 Call this number</a>`;
+          } else if (text.match(/^[\+]?[\d\s\(\)\-]{8,20}$/)) {
+            // if looks like phone number but no prefix
+            linkWrapper.innerHTML = `<a href="tel:${encodeURIComponent(text)}">📞 Dial ${text}</a>`;
+          }
+        }
+      } catch (e) {
+        // not a valid URL, ignore
+        linkWrapper.innerHTML = "";
+      }
+      
+      // success status flash
+      statusDiv.innerHTML = "✅ QR decoded! Ready for next scan.";
+      setTimeout(() => {
+        if (scanningActive) statusDiv.innerHTML = "🔍 Scanning... camera active";
+        else if (!mediaStream) statusDiv.innerHTML = "📁 Camera stopped. Use start or upload";
+      }, 1800);
+    }
+    
+    // simple XSS protection
+    function escapeHtml(str) {
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+        return c;
+      });
+    }
+
+    // ----- Core scanning function (analyzes current video frame) -----
+    function scanVideoFrame() {
+      if (!scanningActive || !video || !video.videoWidth || !video.videoHeight) {
+        // video not ready yet
+        return;
+      }
+      
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+      if (width === 0 || height === 0) return;
+      
+      // set canvas dimensions exactly to video frame size (native resolution)
+      scanCanvas.width = width;
+      scanCanvas.height = height;
+      
+      // draw current video frame onto canvas
+      scanCtx.drawImage(video, 0, 0, width, height);
+      
+      // get image data for jsQR processing
+      const imageData = scanCtx.getImageData(0, 0, width, height);
+      
+      // decode QR code from image data (jsQR is global from CDN)
+      try {
+        const qrCode = jsQR(imageData.data, width, height, {
+          inversionAttempts: "attemptBoth",  // detect inverted qr codes as well
+        });
+        
+        if (qrCode) {
+          const decodedText = qrCode.data;
+          if (decodedText && decodedText !== "") {
+            updateDecodedResult(decodedText);
+            // optional: subtle visual feedback on overlay
+            scanOverlay.style.boxShadow = "inset 0 0 0 3px rgba(0, 255, 170, 0.8)";
+            setTimeout(() => {
+              if (scanOverlay) scanOverlay.style.boxShadow = "inset 0 0 0 2px rgba(0, 255, 255, 0.3)";
+            }, 200);
+          }
+        } else {
+          // optional: no qr found, but don't clear result (keep last result unless we want to reset? But user expects to see new)
+          // we do not auto-clear, only when camera stops or manual reset? Not necessary.
+          // Show a subtle hint if empty but avoid flickering
+          if (lastDecodedData === "" && !qrResultSpan.innerText.includes("Waiting")) {
+            // small idle state
+          }
+        }
+      } catch (err) {
+        console.warn("QR scanning error", err);
+      }
+    }
+    
+    // ----- Scanning Loop (requestAnimationFrame) -----
+    function startScanLoop() {
+      if (!scanningActive) return;
+      scanVideoFrame();
+      animationFrameId = requestAnimationFrame(() => startScanLoop());
+    }
+    
+    function stopScanLoop() {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      scanningActive = false;
+    }
+    
+    // ----- Camera handling (stop any existing, request new) -----
+    async function startCamera() {
+      // if camera already active, stop gracefully first
+      await stopCamera();
+      
+      // reset scanning flag, ensure loop stopped
+      scanningActive = false;
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      
+      // set status
+      statusDiv.innerHTML = "📷 Requesting camera access...";
+      
+      try {
+        // Request back camera on mobile (environment), fallback to any camera
+        const constraints = {
+          video: {
+            facingMode: { exact: "environment" }
+          }
+        };
+        
+        // fallback if environment fails
+        let stream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (envErr) {
+          console.warn("Back camera not available, trying default:", envErr);
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        }
+        
+        mediaStream = stream;
+        video.srcObject = stream;
+        await video.play();
+        
+        // Wait until video metadata loaded so we have dimensions
+        await new Promise((resolve) => {
+          if (video.videoWidth > 0 && video.videoHeight > 0) {
+            resolve();
+          } else {
+            video.addEventListener('loadedmetadata', () => resolve(), { once: true });
+          }
+        });
+        
+        // extra safety: if dimensions still 0, wait a tick
+        if (video.videoWidth === 0 || video.videoHeight === 0) {
+          await new Promise(r => setTimeout(r, 100));
+        }
+        
+        // start scanning
+        scanningActive = true;
+        startScanLoop();
+        
+        statusDiv.innerHTML = "🔍 Camera active - scanning for QR codes...";
+        scanOverlay.style.boxShadow = "inset 0 0 0 2px rgba(0, 255, 255, 0.3)";
+        // optional: clear previous result if needed? Not required but user might want fresh state? leave old.
+        if (lastDecodedData !== "") {
+          // keep old result but not mandatory, user can see new ones
+          statusDiv.innerHTML += " (new scan will update result)";
+        }
+      } catch (err) {
+        console.error("Camera error:", err);
+        let errorMsg = "Camera unavailable: ";
+        if (err.name === "NotAllowedError") errorMsg += "Permission denied. Allow camera access.";
+        else if (err.name === "NotFoundError") errorMsg += "No camera detected on this device.";
+        else errorMsg += err.message || "Could not start video stream.";
+        statusDiv.innerHTML = `❌ ${errorMsg}`;
+        scanningActive = false;
+        mediaStream = null;
+        video.srcObject = null;
+      }
+    }
+    
+    // ----- Stop camera and scanning fully -----
+    async function stopCamera() {
+      // stop scanning loop
+      if (scanningActive) {
+        scanningActive = false;
+      }
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      
+      // stop all tracks from active stream
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => {
+          if (track.readyState === 'live') track.stop();
+        });
+        mediaStream = null;
+      }
+      if (video) {
+        video.srcObject = null;
+        video.pause();
+      }
+      statusDiv.innerHTML = "⏸️ Camera stopped. You can start again or upload image.";
+      scanOverlay.style.boxShadow = "none";
+      // do not clear last decoded result by default (user may keep)
+    }
+    
+    // ----- Upload file & decode QR -----
+    function decodeQRFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // set canvas size to image dimensions
+          const w = img.width;
+          const h = img.height;
+          if (w === 0 || h === 0) {
+            statusDiv.innerHTML = "❌ Invalid image dimensions";
+            return;
+          }
+          scanCanvas.width = w;
+          scanCanvas.height = h;
+          scanCtx.drawImage(img, 0, 0, w, h);
+          const imageData = scanCtx.getImageData(0, 0, w, h);
+          try {
+            const qr = jsQR(imageData.data, w, h, { inversionAttempts: "attemptBoth" });
+            if (qr && qr.data) {
+              updateDecodedResult(qr.data);
+              statusDiv.innerHTML = "📸 QR successfully read from image!";
+              // flash effect on result card
+              const card = document.getElementById('resultCard');
+              if (card) card.style.transition = "0.1s";
+            } else {
+              qrResultSpan.innerHTML = "❌ No QR code found in this image.";
+              linkWrapper.innerHTML = "";
+              statusDiv.innerHTML = "⚠️ Could not detect any QR code. Try another image or better lighting.";
+              lastDecodedData = "";
+            }
+          } catch (err) {
+            console.error(err);
+            qrResultSpan.innerHTML = "⚠️ Error decoding image.";
+            statusDiv.innerHTML = "Decoding failed (invalid format or corrupted)";
+            lastDecodedData = "";
+          }
+        };
+        img.onerror = () => {
+          statusDiv.innerHTML = "❌ Failed to load image. Unsupported format.";
+          qrResultSpan.innerHTML = "Image load error";
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = () => {
+        statusDiv.innerHTML = "File read error";
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // ----- file input change handler -----
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      // if camera scanning is active, we don't interfere but optionally show note
+      if (scanningActive) {
+        statusDiv.innerHTML = "📂 Scanning image while camera is active (both work)";
+      } else {
+        statusDiv.innerHTML = "📄 Analyzing uploaded image...";
+      }
+      decodeQRFromFile(file);
+      // reset file input value to allow re-upload same file
+      event.target.value = '';
+    }
+    
+    // ----- copy result to clipboard -----
+    async function copyResultToClipboard() {
+      const textToCopy = lastDecodedData || qrResultSpan.innerText;
+      if (!textToCopy || textToCopy.includes("Waiting") || textToCopy.includes("No QR")) {
+        statusDiv.innerHTML = "⚠️ Nothing to copy — no QR code data available.";
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(lastDecodedData);
+        statusDiv.innerHTML = "📋 Copied to clipboard!";
+        setTimeout(() => {
+          if (scanningActive) statusDiv.innerHTML = "🔍 Scanning...";
+          else if (!mediaStream) statusDiv.innerHTML = "📁 Ready (camera off)";
+        }, 1500);
+      } catch (err) {
+        statusDiv.innerHTML = "❌ Could not copy, manual selection needed";
+        console.error(err);
+      }
+    }
+    
+    // ----- attach event listeners & initial UI helpers -----
+    function initEventListeners() {
+      startBtn.addEventListener('click', startCamera);
+      stopBtn.addEventListener('click', stopCamera);
+      fileInput.addEventListener('change', handleFileUpload);
+      copyBtn.addEventListener('click', copyResultToClipboard);
+    }
+    
+    // On page load: set initial state, no camera auto-start to respect user action
+    function init() {
+      initEventListeners();
+      // ensure canvas context exists
+      if (!scanCtx) console.warn("canvas context missing");
+      statusDiv.innerHTML = "✨ Ready. Click 'Start Camera' to scan live, or upload an image.";
+      qrResultSpan.innerHTML = "— Waiting for QR code —";
+      linkWrapper.innerHTML = "";
+      lastDecodedData = "";
+      // stop any possible ghost stream on page reload (safety)
+      if (video.srcObject) {
+        stopCamera();
+      }
+    }
+    
+    // optional: ensure when page unload, camera stops
+    window.addEventListener('beforeunload', () => {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(t => t.stop());
+      }
+    });
+    
+    init();
+  })();
+</script>
+</body>
+</html>
